@@ -1,0 +1,15 @@
+---
+description: SQLAlchemy 2.0 async models, sessions, repositories and Alembic migrations
+globs: src/app/**/models.py,src/app/**/repository.py,src/app/core/db.py,alembic/**/*.py
+alwaysApply: false
+---
+# Database (SQLAlchemy 2.0 async + Alembic, PostgreSQL)
+
+- SQLAlchemy 2.0 style only: `DeclarativeBase`, `Mapped[...]`, `mapped_column(...)`, `select()`. Never legacy `session.query()` or `declarative_base()`.
+- Async engine (`create_async_engine`, `asyncpg`) and `async_sessionmaker(expire_on_commit=False)` in `core/db.py`.
+- One session per request via dependency `get_session()` (yield). Services own the transaction: `async with session.begin():`. Repositories never commit.
+- Relationships default `lazy="raise"`; load explicitly with `selectinload()`/`joinedload()` to avoid implicit IO in async code.
+- Tables `snake_case` plural via `__tablename__`; PK `id`; FKs `<entity>_id` with `index=True`; `created_at`/`updated_at` `DateTime(timezone=True)` with `server_default=func.now()`.
+- Set a `MetaData(naming_convention=...)` on Base so constraint names are deterministic for Alembic.
+- Migrations: `alembic revision --autogenerate -m "add_orders_table"`, always review the generated file; never edit an applied migration; no data migrations mixed with schema changes.
+- Never build SQL with f-strings. Use bound parameters or `text("... :id").bindparams(id=...)`.
