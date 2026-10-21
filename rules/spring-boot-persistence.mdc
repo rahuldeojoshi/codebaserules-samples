@@ -1,0 +1,17 @@
+---
+description: JPA entities, repositories, transactions and Flyway migrations
+globs: src/main/java/**/*Repository.java,src/main/java/**/*Entity.java,src/main/resources/db/migration/**,src/main/java/**/*Service.java
+alwaysApply: false
+---
+# Persistence (Spring Data JPA + Flyway, PostgreSQL)
+
+- Schema is owned by Flyway: `src/main/resources/db/migration/V<yyyyMMddHHmm>__<snake_case_description>.sql`. Set `spring.jpa.hibernate.ddl-auto=validate`. Never `update`/`create` outside throwaway tests.
+- Never edit a migration that has been merged; add a new one. Destructive changes go in two releases (stop using → drop).
+- Tables `snake_case` plural (`order_items`), columns `snake_case`, PK `id` (`bigint generated always as identity` or `uuid`), FKs `<entity>_id`, every FK indexed.
+- Every table has `created_at timestamptz not null default now()` and `updated_at timestamptz`.
+- Entities: `@Table(name = "...")` explicit, `@Version Long version` for optimistic locking on mutable aggregates.
+- All associations `fetch = FetchType.LAZY` (including `@ManyToOne`). Solve N+1 with `@EntityGraph` or `join fetch` queries, never by switching to EAGER.
+- `spring.jpa.open-in-view=false`.
+- `@Transactional` on service methods only; class-level `@Transactional(readOnly = true)` and method-level `@Transactional` for writes.
+- Repositories extend `JpaRepository<X, Long>`. Derived queries up to ~3 conditions; beyond that use `@Query` with named params. No string-concatenated JPQL/SQL.
+- `equals`/`hashCode` on entities: based on id with null-safe handling, or not overridden. Never include lazy collections.

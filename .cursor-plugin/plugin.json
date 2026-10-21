@@ -1,0 +1,13 @@
+{
+  "name": "codebaserules-samples",
+  "displayName": "CodebaseRules free samples",
+  "version": "0.1.0",
+  "description": "Free sample Cursor rules for FastAPI, Next.js 15 and Spring Boot, from the rules packs at codebaserules.com",
+  "author": {
+    "name": "RDJArc"
+  },
+  "homepage": "https://codebaserules.com",
+  "repository": "https://github.com/rahuldeojoshi/codebaserules-samples",
+  "license": "MIT",
+  "keywords": ["cursor", "rules", "fastapi", "nextjs", "spring-boot"]
+}

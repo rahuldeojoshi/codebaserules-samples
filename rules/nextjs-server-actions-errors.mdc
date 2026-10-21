@@ -1,0 +1,15 @@
+---
+description: Server Actions, Route Handlers, validation and error handling
+globs: src/features/**/actions.ts,src/app/**/route.ts,src/lib/**/*.ts
+alwaysApply: false
+---
+# Server Actions, Route Handlers & errors
+
+- Mutations use Server Actions in `src/features/<f>/actions.ts` with `"use server"` at the top of the file.
+- Every action: (1) authenticate (`const session = await auth()`), (2) authorize, (3) validate input with Zod `safeParse`, (4) mutate, (5) `revalidatePath`/`revalidateTag`, (6) return a typed result.
+- Action result type: `type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string; fieldErrors?: Record<string, string[]> }`. Expected failures are returned, not thrown.
+- Forms use `useActionState` (React 19) + `useFormStatus` for pending state; not the deprecated `useFormState`.
+- `redirect()` and `notFound()` throw — call them outside `try/catch`.
+- Route Handlers (`route.ts`) only for webhooks, public APIs and non-React clients. Validate body with Zod, return `NextResponse.json(...)` with explicit status; errors as `{ error: { code, message } }`.
+- Unexpected errors bubble to `error.tsx`; log server-side, show a generic message. Never render `error.message` from the server to users in production.
+- Verify webhook signatures before parsing payloads.
